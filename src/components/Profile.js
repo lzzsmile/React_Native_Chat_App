@@ -3,13 +3,16 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import firebase from '../config/firebase'
 import Login from './Login'
 import {Colors} from '../utils/Shared'
+import TextField from './TextField'
 
 export default class Profile extends Component {
 
   state = {
     logout: false,
     name: '',
-    email: ''
+    email: '',
+    newpassword: '',
+    newname: '',
   }
 
   onLogout() {
@@ -19,28 +22,70 @@ export default class Profile extends Component {
       })
   }
 
-  onReset() {
-    firebase
-      .auth()
-      .sendPasswordResetEmail(this.state.email)
-      .then(() => {
-        this.setState({ loading: false });
+  onResetPassword() {
+    const user = firebase.auth().currentUser
+    if (this.state.newpassword) {
+      user.updatePassword(this.state.newpassword).then(() => {
+        this.setState({newpassword: ''})
         this.onLogout()
       })
-      .catch(error => {
-        this.setState({
-          errorMessage: error.message,
-          loading: false
-        });
-      });
+    }
+  }
+
+  onResetName() {
+    if (this.state.newname) {
+      this.setState({
+        name: this.state.newname
+      })
+      const newName = this.state.newname
+      const items = []
+      const user = firebase.auth().currentUser
+      const friendsRef = this.getRef().child("friends")
+      friendsRef.once('value', (snap) => {
+        snap.forEach((child) => {
+          items.push({
+            name: child.val().name,
+            uid: child.val().uid,
+            email: child.val().email
+          })
+        })
+      })
+      items.forEach(child => {
+        if (child.email === user.email) {
+          child.name = newName
+        }
+      })
+      friendsRef.remove().then(() => console.log("Remove all the friends"))
+      items.forEach(child => {
+        friendsRef.push({
+          name: child.name,
+          uid: child.uid,
+          email: child.email
+        })
+      })
+    }
+    this.setState({
+      newname: ''
+    })
   }
 
   loginInfo() {
     const user = firebase.auth().currentUser
-    this.setState({
-      name: user.email.split("@")[0],
-      email: user.email
+    const friendsRef = this.getRef().child("friends")
+    friendsRef.once('value', (snap) => {
+      snap.forEach((child) => {
+        if (child.val().email === user.email) {
+          this.setState({
+            name: child.val().name,
+            email: user.email
+          })
+        }
+      })
     })
+  }
+
+  getRef() {
+    return firebase.database().ref();
   }
 
   componentDidMount() {
@@ -64,9 +109,21 @@ export default class Profile extends Component {
         >
           <Text style={styles.buttonText}>LOGOUT</Text>
         </TouchableOpacity>
+        <TextField placeholder="Enter Your New Name"
+          value={this.state.newname}
+          onChangeText={newname => this.setState({ newname }) } />
         <TouchableOpacity
-          style={styles.button}
-          onPress={this.onReset.bind(this)}
+          style={styles.buttonReset}
+          onPress={this.onResetName.bind(this)}
+        >
+          <Text style={styles.buttonText}>RESET NAME</Text>
+        </TouchableOpacity>
+        <TextField placeholder="Enter New Password"
+          value={this.state.newpassword}
+          onChangeText={newpassword => this.setState({ newpassword }) } />
+        <TouchableOpacity
+          style={styles.buttonReset}
+          onPress={this.onResetPassword.bind(this)}
         >
           <Text style={styles.buttonText}>RESET PASSWORD</Text>
         </TouchableOpacity>
@@ -92,13 +149,25 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#27ae60",
     paddingVertical: 15,
-    margin: 60
+    marginTop: 20,
+    marginLeft: 100,
+    marginRight: 100,
+    marginBottom: 40,
+  },
+  buttonReset: {
+    backgroundColor: "#27ae60",
+    padding: 15,
+    marginTop: 20,
+    marginLeft: 180,
+    marginRight: 6,
+    marginBottom: 20,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
     marginLeft: 6,
+    marginRight: 6,
     marginBottom: 8,
     padding: 25,
     backgroundColor: Colors.grayColor

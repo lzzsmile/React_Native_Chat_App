@@ -11,17 +11,33 @@ export default class Contacts extends Component {
     uid: null,
     email: '',
     dataSource: new ListView.DataSource({rowHasChanged: (row1, row2) => row1 !== row2}),
-    loading: true
+    loading: true,
   }
 
   listenForItems() {
     const user = firebase.auth().currentUser
-    const items = []
-    const filterItems = items.filter(item => item.email != user.email)
-    this.setState({
-      dataSource: this.state.dataSource.cloneWithRows(filterItems),
-      loading: false
+    const friendsRef = this.getRef().child("friends")
+    friendsRef.on('value', (snap) => {
+      const items = []
+      snap.forEach((child) => {
+        items.push({
+          name: child.val().name,
+          uid: child.val().uid,
+          email: child.val().email
+        })
+
+      })
+      const filterItems = items.filter(item => item.email != user.email)
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(filterItems),
+        loading: false
+      })
     })
+
+  }
+
+  getRef() {
+    return firebase.database().ref();
   }
 
   componentDidMount() {
