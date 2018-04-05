@@ -46,14 +46,17 @@ export default class Contacts extends Component {
 
   renderRow = rowData => {
     return (
-      <View style={styles.profileContainer}>
+      <View>
         <TouchableOpacity
-            onPress={() => this.props.navigation.navigate(
-              'Chat', {name: rowData.name, uid: rowData.uid, email: rowData.email}
-            )}>
-          <Text style={styles.profileName}>{rowData.name}</Text>
+          onPress={() => this.props.navigation.navigate(
+            'Chat', {name: rowData.name, uid: rowData.uid, email: rowData.email}
+          )}>
+          <View style={styles.profileContainer}>
+            <Text style={styles.profileName}>{rowData.name}</Text>
+          </View>
         </TouchableOpacity>
       </View>
+
     )
   }
 
@@ -79,10 +82,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 8,
-        marginLeft: 6,
-        marginBottom: 8,
-        padding: 25,
-        backgroundColor: Colors.grayColor
+        padding: 10,
+        backgroundColor: '#ddeeff'
     },
     profileImage: {
         width: 30,
@@ -92,6 +93,6 @@ const styles = StyleSheet.create({
     },
     profileName: {
         marginLeft: 6,
-        fontSize: 26
+        fontSize: 20
     }
 });

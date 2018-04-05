@@ -5,6 +5,7 @@ import firebase from '../config/firebase'
 import {Colors} from '../utils/Shared'
 import TextField from './TextField'
 import Button from './Button'
+import {Location, Permissions} from 'expo'
 
 export default class Chat extends Component {
 
@@ -12,7 +13,10 @@ export default class Chat extends Component {
     super(props);
     this.state = {
       messages: [],
-      city: ''
+      city: '',
+      latitude: null,
+      longitude: null,
+      status: null,
     };
 
     this.user = firebase.auth().currentUser
@@ -61,17 +65,58 @@ export default class Chat extends Component {
 
   componentDidMount() {
     this.listenForItems(this.chatRefData);
-
-    fetch('https://freegeoip.net/json/')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          city: responseJson.city
-        })
+    Permissions.getAsync(Permissions.LOCATION)
+      .then(({status}) => {
+        if (status === 'granted') {
+          return this.setLocation()
+        }
+        this.setState(() => ({status}))
       })
       .catch((error) => {
-        console.error(error)
+        console.warn('Error getting location permission', error)
+        this.setState(() => ({status: 'undetermined'}))
       })
+  }
+
+  askPermission = () => {
+    Permissions.askAsync(Permissions.LOCATION)
+      .then(({status}) => {
+        if (status === 'granted') {
+          return this.setLocation()
+        }
+        this.setState(() => ({status}))
+      })
+      .catch((error) => console.warn('error asking Location permission: ', error))
+  }
+
+  setLocation = () => {
+    Location.watchPositionAsync({
+      enableHighAccuracy: true,
+      timeInterval: 1,
+      distanceInterval: 1,
+    }, ({ coords }) => {
+
+      this.setState(() => ({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        status: 'granted',
+      }))
+
+      const googleURL =
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.state.latitude},${this.state.longitude}&key=AIzaSyBEv-rzcmzxschPPw4zOt_3YH1ObRJbU5U`
+      fetch(googleURL)
+        .then(response => response.json())
+        .then(responseJson => {
+          const address = responseJson.results[0].address_components
+          address.forEach((child) => {
+            if (child.types.includes("locality")) {
+              this.setState({
+                city: child.long_name
+              })
+            }
+          })
+        })
+    })
 
   }
 

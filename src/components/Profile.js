@@ -109,18 +109,22 @@ export default class Profile extends Component {
         >
           <Text style={styles.buttonText}>LOGOUT</Text>
         </TouchableOpacity>
-        <TextField placeholder="Enter Your New Name"
-          value={this.state.newname}
-          onChangeText={newname => this.setState({ newname }) } />
+        <View style={styles.resetContainer}>
+          <TextField placeholder="Enter Your New Name"
+            value={this.state.newname}
+            onChangeText={newname => this.setState({ newname }) } />
+        </View>
         <TouchableOpacity
           style={styles.buttonReset}
           onPress={this.onResetName.bind(this)}
         >
           <Text style={styles.buttonText}>RESET NAME</Text>
         </TouchableOpacity>
-        <TextField placeholder="Enter New Password"
-          value={this.state.newpassword}
-          onChangeText={newpassword => this.setState({ newpassword }) } />
+        <View style={styles.resetContainer}>
+          <TextField placeholder="Enter New Password"
+            value={this.state.newpassword}
+            onChangeText={newpassword => this.setState({ newpassword }) } />
+        </View>
         <TouchableOpacity
           style={styles.buttonReset}
           onPress={this.onResetPassword.bind(this)}
@@ -141,6 +145,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     paddingVertical: 15
   },
+  resetContainer: {
+    marginLeft: 70,
+    marginRight: 6,
+    marginTop: 20,
+    backgroundColor: '#ddeeff'
+  },
   buttonText: {
     textAlign: "center",
     color: "#FFF",
@@ -150,17 +160,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#27ae60",
     paddingVertical: 15,
     marginTop: 20,
-    marginLeft: 100,
-    marginRight: 100,
+    marginLeft: 200,
+    marginRight: 6,
     marginBottom: 40,
   },
   buttonReset: {
     backgroundColor: "#27ae60",
     padding: 15,
-    marginTop: 20,
-    marginLeft: 180,
+    marginTop: 10,
+    marginLeft: 200,
     marginRight: 6,
-    marginBottom: 20,
   },
   profileContainer: {
     flexDirection: 'row',
@@ -168,9 +177,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginLeft: 6,
     marginRight: 6,
-    marginBottom: 8,
-    padding: 25,
-    backgroundColor: Colors.grayColor
+    padding: 10,
+    backgroundColor: '#ddeeff'
   },
   profileText: {
     marginLeft: 6,
