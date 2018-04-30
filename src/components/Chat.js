@@ -103,7 +103,7 @@ export default class Chat extends Component {
       }))
 
       const googleURL =
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.state.latitude},${this.state.longitude}&key=AIzaSyBEv-rzcmzxschPPw4zOt_3YH1ObRJbU5U`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.state.latitude},${this.state.longitude}&key=Your Key`
       fetch(googleURL)
         .then(response => response.json())
         .then(responseJson => {
